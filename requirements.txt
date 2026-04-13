@@ -1,1 +1,6 @@
-requirements
+flask
+httpx
+python-dotenv
+werkzeug
+firebase-admin
+APScheduler  # 나중에 필요할 경우 대비

@@ -64,12 +64,14 @@
         {% if user.image %}
           <img src="{{ user.image }}" alt="프로필">
         {% else %}
-          {{ user.display_name[0].upper() }}
+          {# display_name이 빈 문자열이어도 IndexError 방지 #}
+          {{ (user.display_name or '?')[0].upper() }}
         {% endif %}
       </div>
-      <h1>{{ user.display_name }}</h1>
+      <h1>{{ user.display_name or '사용자' }}</h1>
       <p class="email">{{ user.email }}</p>
       <a href="/playlists" class="btn btn-green">내 플레이리스트 보기</a>
+      <a href="/history" class="btn btn-outline">청취 기록 내보내기 (JSON)</a>
       <a href="/logout" class="btn btn-outline">로그아웃</a>
 
     {% else %}
