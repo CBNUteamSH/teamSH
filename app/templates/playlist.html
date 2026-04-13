@@ -90,6 +90,7 @@
     .track-duration { color: #bbb; font-size: 13px; text-align: right; }
 
     .page-title { font-size: 22px; font-weight: 700; color: #111; margin-bottom: 24px; }
+    .empty { color: #999; text-align: center; margin-top: 48px; font-size: 15px; }
   </style>
 </head>
 <body>
@@ -110,9 +111,10 @@
         {% endif %}
         <div>
           <h1>{{ playlist.name }}</h1>
-          <p>{{ playlist.tracks.total }}곡</p>
+          <p>{{ (playlist.tracks or {}).get('total', 0) }}곡</p>
           {% if playlist.description %}
-            <p style="margin-top:8px">{{ playlist.description }}</p>
+            {# Spotify description은 HTML을 포함할 수 있어 | safe 처리 #}
+            <p style="margin-top:8px">{{ playlist.description | safe }}</p>
           {% endif %}
         </div>
       </div>
@@ -137,9 +139,14 @@
                 {{ track.artists | map(attribute='name') | join(', ') }}
               </td>
               <td class="track-duration">
-                {% set m = (track.duration_ms // 60000) %}
-                {% set s = ((track.duration_ms % 60000) // 1000) %}
-                {{ m }}:{{ '%02d' % s }}
+                {# duration_ms가 None인 트랙(팟캐스트 등) 방어 처리 #}
+                {% if track.duration_ms %}
+                  {% set m = (track.duration_ms // 60000) %}
+                  {% set s = ((track.duration_ms % 60000) // 1000) %}
+                  {{ m }}:{{ '%02d' % s }}
+                {% else %}
+                  —
+                {% endif %}
               </td>
             </tr>
             {% endif %}
@@ -150,21 +157,25 @@
     {% else %}
       <!-- 플레이리스트 목록 -->
       <p class="page-title">내 플레이리스트</p>
-      <div class="grid">
-        {% for pl in playlists %}
-        <a href="/playlists/{{ pl.id }}" class="pl-card">
-          {% if pl.images %}
-            <img src="{{ pl.images[0].url }}" alt="{{ pl.name }}">
-          {% else %}
-            <div class="no-img">🎵</div>
-          {% endif %}
-          <div class="info">
-            <p class="name">{{ pl.name }}</p>
-            <p class="count">{{ pl.tracks.total }}곡</p>
-          </div>
-        </a>
-        {% endfor %}
-      </div>
+      {% if playlists %}
+        <div class="grid">
+          {% for pl in playlists %}
+          <a href="/playlists/{{ pl.id }}" class="pl-card">
+            {% if pl.images %}
+              <img src="{{ pl.images[0].url }}" alt="{{ pl.name }}">
+            {% else %}
+              <div class="no-img">🎵</div>
+            {% endif %}
+            <div class="info">
+              <p class="name">{{ pl.name }}</p>
+              <p class="count">{{ (pl.tracks or {}).get('total', 0) }}곡</p>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty">플레이리스트가 없습니다.</p>
+      {% endif %}
     {% endif %}
   </div>
 </body>

@@ -1,4 +1,5 @@
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 from dotenv import load_dotenv
 import os
 
@@ -6,18 +7,22 @@ load_dotenv()
 
 def create_app():
     app = Flask(__name__, template_folder="templates")
-    
+
     secret_key = os.getenv("SECRET_KEY")
     if not secret_key:
         raise ValueError("SECRET_KEY가 .env에 없습니다!")
-    
+
     app.secret_key = secret_key
-    
+
     # 세션 쿠키 설정
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_SECURE=True,  # HTTPS 환경에서 쿠키 보호
     )
+
+    # IIS 등 리버스 프록시 뒤에서 url_for가 https:// 로 생성되도록
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
     from .auth import auth_bp
     from .routes import main_bp
