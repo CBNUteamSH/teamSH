@@ -65,6 +65,19 @@ def me():
         return redirect(url_for("auth.spotify_login"))
     return render_template("me.html", user=user)
 
+@main_bp.route("/cup")
+def cup():
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("auth.spotify_login"))
+    return render_template("cup.html", user=user)
+
+@main_bp.route("/cupEnter")
+def cupEnter():
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("auth.spotify_login"))
+    return render_template("cupEnter.html", user=user)
 
 @main_bp.route("/playlists")
 def playlists():
