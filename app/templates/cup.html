@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주최 컵 목록</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+        }
+
+        /* 컵 목록을 담을 그리드 레이아웃 */
+        .cup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* 개별 컵 카드 스타일 */
+        .cup-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .cup-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .cup-name {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin: 0 0 0.5rem 0;
+            color: #222;
+        }
+
+        .cup-duration {
+            font-size: 0.9rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* 상태 뱃지 (진행중, 예정, 종료) */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .badge.active { background-color: #e8f5e9; color: #2e7d32; }
+        .badge.upcoming { background-color: #e3f2fd; color: #1565c0; }
+        .badge.ended { background-color: #ffebee; color: #c62828; }
+    </style>
+</head>
+<body>
+
+    <h1>개최 컵 목록</h1>
+    
+    <div id="cup-container" class="cup-grid"></div>
+
+    <script>
+        // ============================================================================
+        // 🛠️ 개발자 설정 영역: 새로운 컵을 추가하려면 아래 배열에 객체만 추가하세요.
+        // ============================================================================
+        const cupsData = [
+            {
+                id: 1,
+                name: "K-POP 컵",
+                startDate: "2026-03-01",
+                endDate: "2026-03-15",
+                status: "ended" // 'active'(진행중), 'upcoming'(예정), 'ended'(종료)
+            },
+            {
+                id: 2,
+                name: "재즈 컵",
+                startDate: "2026-04-10",
+                endDate: "2026-04-30",
+                status: "active"
+            },
+        ];
+        // ============================================================================
+
+        
+        // 상태값에 따른 텍스트와 클래스를 반환하는 헬퍼 함수
+        function getStatusInfo(status) {
+            switch(status) {
+                case 'active': return { text: '진행 중', className: 'active' };
+                case 'upcoming': return { text: '예정됨', className: 'upcoming' };
+                case 'ended': return { text: '종료됨', className: 'ended' };
+                default: return { text: '-', className: '' };
+            }
+        }
+
+        // 화면에 데이터를 렌더링하는 함수
+        function renderCups() {
+            const container = document.getElementById('cup-container');
+            container.innerHTML = ''; // 기존 내용 초기화
+
+            cupsData.forEach(cup => {
+                const statusInfo = getStatusInfo(cup.status);
+                
+                let enterButtonHtml = "";
+                    if (statusInfo.className === "active") {
+                        enterButtonHtml = `<a href="/cupEnter" class="btn btn-green">컵 참가</a>`;
+                    }
+                
+                // 카드 HTML 요소 생성
+                const card = document.createElement('div');
+                card.className = 'cup-card';
+                
+                card.innerHTML = `
+                    <span class="badge ${statusInfo.className}">${statusInfo.text}</span>
+                    <h3 class="cup-name">${cup.name}</h3>
+                    <div class="cup-duration">
+                         ${cup.startDate} ~ ${cup.endDate}
+                    </div>
+                    ${enterButtonHtml}
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // 페이지 로드 시 렌더링 실행
+        document.addEventListener('DOMContentLoaded', renderCups);
+    </script>
+</body>
+</html>
